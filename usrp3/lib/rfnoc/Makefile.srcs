@@ -110,4 +110,5 @@ cordic.v \
 ddc.v \
 cic_decimate.v \
 sine_tone.v \
+zero_pad.v \
 ))
