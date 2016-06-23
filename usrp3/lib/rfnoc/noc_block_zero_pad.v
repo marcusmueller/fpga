@@ -1,8 +1,8 @@
 module noc_block_zero_pad #(
   parameter NOC_ID = 64'h6667_0000_0000_0000,
   parameter STR_SINK_FIFOSIZE = 11,
-  parameter IN_L = 48,
-  parameter OUT_L = 64
+  parameter IN_L = 20,
+  parameter OUT_L = 32
   )
 (
   input bus_clk, input bus_rst,
@@ -186,7 +186,7 @@ module noc_block_zero_pad #(
   
   zero_pad #(
 	  .WIDTH(32),
-	  .OUT_L(32)
+	  .OUT_L(OUT_L)
   )
   zero_pad (
 	  .clk(ce_clk),

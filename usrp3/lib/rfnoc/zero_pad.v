@@ -30,7 +30,7 @@ always @(posedge clk) begin
 		if (i_tlast) begin
 			zeropadding <= 1;
 		end
-		if (sample_cnt == (OUT_L-1)) begin
+		if (sample_cnt == (2*OUT_L-1)) begin
 			zeropadding <= 0;
 			last <= 1;
 		end else begin
@@ -39,7 +39,6 @@ always @(posedge clk) begin
 	end
 end
 
-wire [WIDTH-1:0] scount;
 assign o_tdata  = (~zeropadding) ? i_tdata : 0;
 //assign o_tdata = 32'hdeadbeef;
 assign i_tready = (o_tready & ~zeropadding);
