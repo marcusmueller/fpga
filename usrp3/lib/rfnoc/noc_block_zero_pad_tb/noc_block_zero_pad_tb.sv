@@ -1,6 +1,6 @@
 `timescale 1ns/1ps
 `define NS_PER_TICK 1
-`define NUM_TEST_CASES 5
+`define NUM_TEST_CASES 4
 
 `include "sim_exec_report.vh"
 `include "sim_clks_rsts.vh"
@@ -48,31 +48,29 @@ $display("Read Skeleton NOC ID: %16x", readback);
 ** Test 3 -- Connect RFNoC blocks
 ********************************************************/
 `TEST_CASE_START("Connect RFNoC blocks");
-`RFNOC_CONNECT(noc_block_tb,noc_block_zero_pad,SC16,IN_L);
-`RFNOC_CONNECT(noc_block_zero_pad,noc_block_tb,SC16,OUT_L);
+`RFNOC_CONNECT(noc_block_tb,noc_block_zero_pad,S32,IN_L);
+`RFNOC_CONNECT(noc_block_zero_pad,noc_block_tb,S32,OUT_L);
 `TEST_CASE_DONE(1);
 
 /********************************************************
 ** Test 4 -- Write / readback user registers
 ********************************************************/
-`TEST_CASE_START("Write / readback user registers");
-random_word = $random();
-tb_streamer.write_user_reg(sid_noc_block_zero_pad, noc_block_zero_pad.SR_TEST_REG_0, random_word);
-tb_streamer.read_user_reg(sid_noc_block_zero_pad, 0, readback);
-$sformat(s, "User register 0 incorrect readback! Expected: %0d, Actual %0d", readback[31:0], random_word);
-`ASSERT_ERROR(readback[31:0] == random_word, s);
-random_word = $random();
-tb_streamer.write_user_reg(sid_noc_block_zero_pad, noc_block_zero_pad.SR_TEST_REG_1, random_word);
-tb_streamer.read_user_reg(sid_noc_block_zero_pad, 1, readback);
-$sformat(s, "User register 1 incorrect readback! Expected: %0d, Actual %0d", readback[31:0], random_word);
-`ASSERT_ERROR(readback[31:0] == random_word, s);
-`TEST_CASE_DONE(1);
+//`TEST_CASE_START("Write / readback user registers");
+//random_word = $random();
+//tb_streamer.write_user_reg(sid_noc_block_zero_pad, noc_block_zero_pad.SR_TEST_REG_0, random_word);
+//tb_streamer.read_user_reg(sid_noc_block_zero_pad, 0, readback);
+//$sformat(s, "User register 0 incorrect readback! Expected: %0d, Actual %0d", readback[31:0], random_word);
+//`ASSERT_ERROR(readback[31:0] == random_word, s);
+//random_word = $random();
+//tb_streamer.write_user_reg(sid_noc_block_zero_pad, noc_block_zero_pad.SR_TEST_REG_1, random_word);
+//tb_streamer.read_user_reg(sid_noc_block_zero_pad, 1, readback);
+//$sformat(s, "User register 1 incorrect readback! Expected: %0d, Actual %0d", readback[31:0], random_word);
+//`ASSERT_ERROR(readback[31:0] == random_word, s);
+//`TEST_CASE_DONE(1);
 
 /********************************************************
 ** Test 5 -- Test sequence
 ********************************************************/
-// Skeleton's user code is a loopback, so we should receive
-// back exactly what we send
 `TEST_CASE_START("Test sequence");
 fork
 begin
@@ -85,7 +83,7 @@ end
 begin
 cvita_payload_t recv_payload;
 cvita_metadata_t md;
-logic [32:0] expected_value;
+logic [15:0] expected_value;
 tb_streamer.recv(recv_payload,md);
 for (int i = 0; i < IN_L; i++) begin
 	expected_value = i;

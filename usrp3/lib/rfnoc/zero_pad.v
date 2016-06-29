@@ -15,34 +15,55 @@ module zero_pad #(
   assign s_axis_data_tdata  = m_axis_data_tdata;
 */
 reg [WIDTH-1:0] sample_cnt;
-reg zeropadding;
-reg last;
+
+reg [2:0] state;
+localparam IDLE = 2'd0;
+localparam PASSING = 2'd1;
+localparam ZERO = 2'd2;
+localparam LAST = 2'd3;
 
 always @(posedge clk) begin
 	if (reset) begin
-		sample_cnt <= 0;
-		zeropadding <= 0;
-		last <= 0;
+		state <= IDLE;
 	end else begin
-		if (i_tvalid) begin
-			sample_cnt <= sample_cnt + 1'd1;
-		end
-		if (i_tlast) begin
-			zeropadding <= 1;
-		end
-		if (sample_cnt == (2*OUT_L-1)) begin
-			zeropadding <= 0;
-			last <= 1;
-		end else begin
-			last <= 0;
-		end
+		case(state)
+			IDLE: begin
+				sample_cnt <= 0;
+				if(i_tvalid & o_tready) begin
+					state <= PASSING;
+				end
+			end
+			PASSING: begin
+				if(i_tvalid & o_tready) begin
+					sample_cnt <= sample_cnt + 1'd1;
+					if(i_tlast) begin
+						state <= ZERO;
+					end
+				end
+			end
+			ZERO: begin
+				if(o_tready) begin
+					sample_cnt <= sample_cnt + 1'd1;
+					if(sample_cnt == (OUT_L - 1)) begin
+						state <= LAST;
+					end
+				end
+
+			end
+			LAST: begin
+				if(o_tready) begin
+					state <= IDLE;
+				end
+			end
+
+		endcase
 	end
 end
 
-assign o_tdata  = (~zeropadding) ? i_tdata : 0;
+assign o_tdata  = (state==PASSING) ? i_tdata : 0;
 //assign o_tdata = 32'hdeadbeef;
-assign i_tready = (o_tready & ~zeropadding);
-assign o_tlast  = last;
-assign o_tvalid = (~zeropadding) ? i_tvalid : 1;
+assign i_tready = (state==PASSING) ? o_tready : 0;
+assign o_tlast  = (state==LAST);
+assign o_tvalid = (state==PASSING) ? i_tvalid : ~(state==IDLE);
 
 endmodule

@@ -2,7 +2,8 @@ module noc_block_zero_pad #(
   parameter NOC_ID = 64'h6667_0000_0000_0000,
   parameter STR_SINK_FIFOSIZE = 11,
   parameter IN_L = 20,
-  parameter OUT_L = 32
+  parameter OUT_L = 32,
+  parameter WIDTH = 32
   )
 (
   input bus_clk, input bus_rst,
@@ -69,15 +70,17 @@ module noc_block_zero_pad #(
   // Convert RFNoC Shell interface into AXI stream interface
   //
   ////////////////////////////////////////////////////////////
-  wire [31:0] m_axis_data_tdata;
+  wire [WIDTH-1:0] m_axis_data_tdata;
   wire        m_axis_data_tlast;
   wire        m_axis_data_tvalid;
   wire        m_axis_data_tready;
 
-  wire [31:0] s_axis_data_tdata;
+  wire [WIDTH-1:0] s_axis_data_tdata;
   wire        s_axis_data_tlast;
   wire        s_axis_data_tvalid;
   wire        s_axis_data_tready;
+  wire [127:0] s_axis_data_tuser;
+  wire [127:0] m_axis_data_tuser;
 
   axi_wrapper #(
     .SIMPLE_MODE(1))
@@ -185,7 +188,7 @@ module noc_block_zero_pad #(
     .use_vita_time(1'b0), .vita_time());
   
   zero_pad #(
-	  .WIDTH(32),
+	  .WIDTH(WIDTH),
 	  .OUT_L(OUT_L)
   )
   zero_pad (
